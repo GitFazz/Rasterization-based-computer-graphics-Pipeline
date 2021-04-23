@@ -28,6 +28,8 @@ struct matrix {
                 val[i][j] = 0;
             }
         }
+
+        val[3][3] = 1;
     }
 
     matrix(double x11,double x12,double x13,double x14,
@@ -45,11 +47,6 @@ struct matrix {
 };
 
 //////// func /////////////
-
-void print_point(struct point p) {
-    cout << setprecision(2) << fixed;
-    cout << p.x << "\t" << p.y << "\t" << p.z << "\t" << endl;
-}
 
 struct point transformPoint(struct matrix T, struct point P) {
 
@@ -176,7 +173,7 @@ struct point negVector(struct point v) {
 
 
 ///////// var /////////////
-fstream input,output;
+
 double eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ, fovY, aspectRatio, near, f;
 string command;
 
@@ -199,50 +196,58 @@ int main()
 
     std::ios::sync_with_stdio(false);
 
+    
+    ////////////////////////////////////////// STAGE 1 ////////////////////////////////////////////////
 
+
+    ifstream in1; 
+    in1.open("scene.txt");
+
+
+    ofstream out1;
+    out1.open("stage1.txt");
+
+    out1 << fixed << setprecision(2);
     
     
     //////////// load data ////////////
 
-    cin >> eyeX >> eyeY >> eyeZ >> lookX >> lookY >> lookZ >> upX >> upY >> upZ >> fovY >> aspectRatio >> near >> f; 
+    in1 >> eyeX >> eyeY >> eyeZ >> lookX >> lookY >> lookZ >> upX >> upY >> upZ >> fovY >> aspectRatio >> near >> f; 
 
-
-
-
-
-
-
-    ////////////////////////////////////////// STAGE 1 ////////////////////////////////////////////////
-
-    freopen("scene.txt","r",stdin);
-    //freopen("stage1.txt","w",stdout);
+    
     
     while (true)
     {
-        cin >>  command;
+        in1 >>  command;
+
 
         if(command.compare("triangle")==0) {
 
             point p1, p2, p3;
 
-            cin>> p1.x >> p1.y >> p1.z;
-            cin>> p2.x >> p2.y >> p2.z;
-            cin>> p3.x >> p3.y >> p3.z;
+            in1>> p1.x >> p1.y >> p1.z;
+            in1>> p2.x >> p2.y >> p2.z;
+            in1>> p3.x >> p3.y >> p3.z;
 
             point pt1 = transformPoint(S.top(),p1);
             point pt2 = transformPoint(S.top(),p2);
             point pt3 = transformPoint(S.top(),p3);
 
-            print_point(pt1);
-            print_point(pt2);
-            print_point(pt3);
+            ////////////// print ////////////////////
 
-            cout << endl;
+            
+    
+            out1 << pt1.x << "\t" << pt1.y << "\t" << pt1.z << endl;
+            out1 << pt2.x << "\t" << pt2.y << "\t" << pt2.z << endl;
+            out1 << pt3.x << "\t" << pt3.y << "\t" << pt3.z << endl;
+            out1 << endl;
+
+
         }
         
         else if(command.compare("translate")==0) {
             point T;
-            cin >> T.x >> T.y >> T.z;
+            in1 >> T.x >> T.y >> T.z;
 
 
             matrix Tr(
@@ -258,7 +263,7 @@ int main()
 
         else if(command.compare("scale")==0) {
             point s;
-            cin >> s.x >> s.y >> s.z;
+            in1 >> s.x >> s.y >> s.z;
 
             matrix Sc(
                 s.x, 0, 0, 0,
@@ -277,7 +282,7 @@ int main()
             double angle;
             point axis;
 
-            cin >> angle >> axis.x >> axis.y >> axis.z;
+            in1 >> angle >> axis.x >> axis.y >> axis.z;
 
             matrix Rt = rotate(angle,axis);
 
@@ -310,14 +315,21 @@ int main()
 
 
     }
+
+    in1.close();
+    out1.close();
     
-    
-
-
-
 
     ////////////////////////////////////////// STAGE 2 ////////////////////////////////////////////////
+    
+    ifstream in2; 
+    in2.open("stage1.txt");
 
+
+    ofstream out2;
+    out2.open("stage2.txt");
+
+    out2 << fixed << setprecision(2);
 
 
 
@@ -349,8 +361,44 @@ int main()
 
     matrix V = product(R,T);
 
+    
+    while (true)
+    {
+        matrix m;
+
+        for(int i=0;i<3;i++) {
+            for(int j=0;j<3;j++) {
+                if(in2>>m.val[i][j]) {
+                    ////// 
+                }
+                else
+                    goto out;
+            }
+
+        }
 
 
+        //// found a new matrix;
+
+
+
+        matrix mm = product(V,m);
+
+        for(int i=0;i<3;i++) {
+            for(int j=0;j<3;j++) {
+                out2 << mm.val[i][j] << "\t";
+            }
+            out2 << endl;
+        }
+        out2 << endl;
+
+
+
+    }
+    
+    out:
+    
+    
 
 
 
