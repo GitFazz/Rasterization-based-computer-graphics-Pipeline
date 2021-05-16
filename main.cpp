@@ -406,7 +406,7 @@ int main()
 
         print_matrix(m,"input ");
 
-        //// found a new matrix;
+        //// found a new matrix; ////////
 
         matrix mm = product(V,m);
 
