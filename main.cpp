@@ -1,5 +1,10 @@
-// Bismillahir Rahmanir Raheem
-#include<iostream>
+// Efaz, 1605034
+
+#include <iostream>
+#include <stack>
+#include <cmath>
+#include <fstream>
+
 #define PI (2*acos(0.0))
 #include "bitmap_image.hpp"
 
@@ -7,7 +12,10 @@ using namespace std;
 
 ///////// class ///////////
 
-struct point {
+class point {
+    
+
+    public:
     double x,y,z,w;
 
     point() {
@@ -17,6 +25,83 @@ struct point {
     point(double xx,double yy,double zz) {
         x = xx; y = yy; z = zz; w = 1;
     }
+
+     void normalize()
+    {
+        double r = sqrt((x * x) + (y * y) + (z * z));
+        x = x / r;
+        y = y / r;
+        z = z / r;
+    }
+
+    point operator+(point v)
+    {
+        point temp;
+        temp.x = this->x + v.x;
+        temp.y = this->y + v.y;
+        temp.z = this->z + v.z;
+
+        return temp;
+    }
+
+    point operator-(point v)
+    {
+        point temp;
+        temp.x = this->x - v.x;
+        temp.y = this->y - v.y;
+        temp.z = this->z - v.z;
+
+        return temp;
+    }
+
+    point &operator=(point v)
+    {
+        this->x = v.x;
+        this->y = v.y;
+        this->z = v.z;
+
+        return *this;
+    }
+
+    point operator*(double d)
+    {
+        point temp;
+        temp.x = x * d;
+        temp.y = y * d;
+        temp.z = z * d;
+        return temp;
+    }
+    void print()
+    {
+        cout << x << " " << y << " " << z << endl;
+    }
+
+    double dot(point p)
+    {
+        return (this->x * p.x) + (this->y * p.y) + (this->z * p.z);
+    }
+
+    point cross(point p)
+    {
+        point temp;
+        temp.x = (y * p.z - z * p.y);
+        temp.y = (z * p.x - x * p.z);
+        temp.z = (x * p.y - y * p.x);
+        return temp;
+    }
+
+    void homogeneous() {
+        if(w != 1) {
+            x = x/w;
+            y = y/w;
+            z = z/w;
+            w = 1;
+        }
+    }
+
+    
+
+
 };
 
 
@@ -28,11 +113,13 @@ struct matrix {
         for(int i=0;i<4;i++){
             for(int j=0;j<4;j++) {
                 val[i][j] = 0;
+               // if(i==j) val[i][j] = 1;
             }
         }
-
-        val[3][3] = 1;
+        //val[3][3] = 1;
     }
+
+    
 
     matrix(double x11,double x12,double x13,double x14,
            double x21,double x22,double x23,double x24,
@@ -50,6 +137,7 @@ struct matrix {
 
 //////// func /////////////
 
+
 void print_matrix(matrix m,string s) {
     cout << " >> "+s << endl;
     for(int i=0;i<4;i++) {
@@ -61,23 +149,6 @@ void print_matrix(matrix m,string s) {
     cout << endl;
 }
 
-
-void print_vect(point p,string s) {
-    cout << s + " : " ;
-    cout << p.x << " " << p.y << " " << p.z << endl;
-}
-
-struct point transformPoint(struct matrix T, struct point P) {
-
-    point ret;
-
-    ret.x = T.val[0][0]*P.x + T.val[0][1]*P.y + T.val[0][2]*P.z + T.val[0][3]*P.w;
-    ret.y = T.val[1][0]*P.x + T.val[1][1]*P.y + T.val[1][2]*P.z + T.val[1][3]*P.w;
-    ret.z = T.val[2][0]*P.x + T.val[2][1]*P.y + T.val[2][2]*P.z + T.val[2][3]*P.w;
-    ret.w = T.val[3][0]*P.x + T.val[3][1]*P.y + T.val[3][2]*P.z + T.val[3][3]*P.w;
-
-    return ret;
-}
 
 
 struct matrix product(struct matrix L,struct matrix R) {
@@ -98,67 +169,25 @@ struct matrix product(struct matrix L,struct matrix R) {
 
 }
 
-struct point normalize(struct point p) {
-    struct point ret;
-
-    double div = sqrt(  p.x*p.x + p.y*p.y + p.z*p.z );
-
-    ret.x = p.x / div;
-    ret.y = p.y / div;
-    ret.z = p.z / div;
-
-    return ret;
-}
-
-struct point cross_product(struct point p1,struct point p2)
-{
-    struct point ret;
-
-    ret.x = p1.y * p2.z - p1.z * p2.y;
-    ret.y = p1.z * p2.x - p1.x * p2.z;
-    ret.z = p1.x * p2.y - p1.y * p2.x;
 
 
-    return ret;
-
-}
-
-double dot_product (struct point a,struct point b) {
-    return (a.x*b.x + a.y*b.y + a.z*b.z);
-}
-
-struct point R(point L,point R,double angle) {
-
-    angle = (PI * angle) / 180.0;
-    double cosO = cos(angle);
-    double sinO = sqrt( 1-cosO*cosO );
-
-    double dot = dot_product(R,L);
-    point cross = cross_product(R,L);
-
-    struct point c;
-    c.x = R.x*cosO + L.x*dot*(1-cosO)  + cross.x*sinO;
-    c.y = R.y*cosO + L.y*dot*(1-cosO)  + cross.y*sinO;
-    c.z = R.z*cosO + L.z*dot*(1-cosO)  + cross.z*sinO;
-
-
-    return c;
-}
 
 struct matrix rotate(double angle,point a)
 {
 
 
-    a = normalize(a);
+    a.normalize();
+    angle = (acos(-1.0) / 180.0) * angle;
 
     point i (1,0,0);
     point j (0,1,0);
     point k (0,0,1);
 
-    point c1 = R(i,a,angle);
-    point c2 = R(j,a,angle);
-    point c3 = R(k,a,angle);
+    point c1 = i * cos(angle) + a * ((a.dot(i)) * (1 - cos(angle))) + a.cross(i) * sin(angle);
 
+    point c2 = j * cos(angle) + a * ((a.dot(j)) * (1 - cos(angle))) + a.cross(j) * sin(angle);
+
+    point c3 = k * cos(angle) + a * ((a.dot(k)) * (1 - cos(angle))) + a.cross(k) * sin(angle);
 
     matrix ret(
             c1.x, c2.x, c3.x, 0,
@@ -188,16 +217,27 @@ struct point negVector(struct point v) {
     return point(-v.x,-v.y,-v.z);
 }
 
+struct point transformPoint(struct matrix T, struct point P) {
+
+    point ret;
+    
+    ret.x = T.val[0][0]*P.x + T.val[0][1]*P.y + T.val[0][2]*P.z + T.val[0][3]*P.w;
+    ret.y = T.val[1][0]*P.x + T.val[1][1]*P.y + T.val[1][2]*P.z + T.val[1][3]*P.w;
+    ret.z = T.val[2][0]*P.x + T.val[2][1]*P.y + T.val[2][2]*P.z + T.val[2][3]*P.w;
+    ret.w = T.val[3][0]*P.x + T.val[3][1]*P.y + T.val[3][2]*P.z + T.val[3][3]*P.w; 
+
+    return ret;
+}
+
 
 
 
 ///////// var /////////////
 
-double eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ, fovY, aspectRatio, near, f;
+double eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ, fovY, aspectRatio, near, far;
 string command;
 
 stack<matrix> S;
-stack<int> L;
 
 int main()
 {
@@ -231,7 +271,7 @@ int main()
 
     //////////// load data ////////////
 
-    in1 >> eyeX >> eyeY >> eyeZ >> lookX >> lookY >> lookZ >> upX >> upY >> upZ >> fovY >> aspectRatio >> near >> f;
+    in1 >> eyeX >> eyeY >> eyeZ >> lookX >> lookY >> lookZ >> upX >> upY >> upZ >> fovY >> aspectRatio >> near >> far;
 
 
 
@@ -248,12 +288,15 @@ int main()
             in1>> p2.x >> p2.y >> p2.z;
             in1>> p3.x >> p3.y >> p3.z;
 
-            point pt1 = transformPoint(S.top(),p1);
-            point pt2 = transformPoint(S.top(),p2);
-            point pt3 = transformPoint(S.top(),p3);
+            point pt1 = transformPoint(S.top(),p1) ;
+            point pt2 = transformPoint(S.top(),p2) ;
+            point pt3 = transformPoint(S.top(),p3) ;
+
+            pt1.homogeneous();
+            pt2.homogeneous();
+            pt3.homogeneous();
 
             ////////////// print ////////////////////
-
 
 
             out1 << pt1.x << "\t" << pt1.y << "\t" << pt1.z << endl;
@@ -276,7 +319,10 @@ int main()
                     0, 0, 0, 1
             );
 
-            S.push( product(S.top(),Tr) );
+            matrix temp = S.top();
+            S.pop();
+
+            S.push( product(temp,Tr) );
 
         }
 
@@ -291,7 +337,10 @@ int main()
                     0, 0, 0, 1
             );
 
-            S.push( product(S.top(),Sc) );
+            matrix temp = S.top();
+            S.pop();
+
+            S.push( product(temp,Sc) );
 
 
         }
@@ -305,24 +354,21 @@ int main()
 
             matrix Rt = rotate(angle,axis);
 
-            S.push( product(S.top(),Rt) );
+            matrix temp = S.top();
+            S.pop();
+
+            S.push( product(temp,Rt) );
 
         }
 
         else if(command.compare("push")==0) {
-            L.push( S.size() );
+            matrix temp = S.top();
+            S.push( temp );
         }
 
         else if(command.compare("pop")==0) {
 
-            int s = L.top();
-            L.pop();
-
-            while (S.size() > s )
-            {
-                S.pop();
-            }
-
+            S.pop();
         }
 
         else if(command.compare("end")==0) {
@@ -356,13 +402,12 @@ int main()
     point up(upX,upY,upZ);
     point eye(eyeX,eyeY,eyeZ);
 
-    point l = add( look, negVector(eye) );
-    l = normalize(l);
+    point l = (look - eye);
+    l.normalize();
+    point r = l.cross(up);
+    r.normalize();
+    point u = r.cross(l);
 
-    point r = cross_product(l,up);
-    r = normalize(r);
-
-    point u = cross_product(r,l);
 
     matrix T(
             1, 0, 0, -eyeX,
@@ -380,22 +425,21 @@ int main()
             0, 0, 0, 1
     );
 
-    print_matrix(R,"R");
-    print_matrix(T,"T");
-
     matrix V = product(R,T);
 
-    print_matrix(V,"V");
+
 
 
     while (true)
     {
-        matrix m;
+        
+
+        double val[3][3];
 
 
         for(int i=0;i<3;i++) {
             for(int j=0;j<3;j++) {
-                if(in2>>m.val[i][j]) {
+                if(in2>>val[i][j]) {
                     //////
                 }
                 else
@@ -404,26 +448,101 @@ int main()
 
         }
 
-        print_matrix(m,"input ");
+        point p1(val[0][0],val[0][1],val[0][2]), p2(val[1][0],val[1][1],val[1][2]), p3(val[2][0],val[2][1],val[2][2]);
+        
 
-        //// found a new matrix
+        point pt1 = transformPoint(V,p1) ;
+        point pt2 = transformPoint(V,p2) ;
+        point pt3 = transformPoint(V,p3) ;
 
-        matrix mm = product(V,m);
+        pt1.homogeneous();
+        pt2.homogeneous();
+        pt3.homogeneous();
+        ////////////// print ////////////////////
 
 
-        for(int i=0;i<3;i++) {
-            for(int j=0;j<3;j++) {
-                out2 << mm.val[i][j] << "\t";
-            }
-            out2 << endl;
-        }
-        out2 << endl;
+        out2 << pt1.x << "\t" << pt1.y << "\t" << pt1.z << endl;
+        out2 << pt2.x << "\t" << pt2.y << "\t" << pt2.z << endl;
+        out2 << pt3.x << "\t" << pt3.y << "\t" << pt3.z << endl;
+        out2 << endl;      
 
 
 
     }
 
     out:
+
+    in2.close();
+    out2.close();
+
+
+    //////////////////////////////// STAGE 3 //////////////////////////////////////////////////////////////////
+
+    ifstream in3;
+    in3.open("stage2.txt");
+
+
+    ofstream out3;
+    out3.open("stage3.txt");
+
+    out3 << fixed << setprecision(2);
+
+    double fovX = fovY * aspectRatio;
+    double tt = near * tan( (fovY*PI) / (2*180) );
+    double rr = near * tan( (fovX*PI) / (2*180) );
+
+    matrix P(
+        near/rr, 0, 0, 0, 
+        0, near/tt, 0, 0, 
+        0, 0, -(far+near)/(far-near), -(2*far*near)/(far-near),
+        0, 0, -1, 0
+    );
+
+
+    while (true)
+    {
+        double val[3][3];
+
+
+        for(int i=0;i<3;i++) {
+            for(int j=0;j<3;j++) {
+                if(in3>>val[i][j]) {
+                    //////
+                }
+                else
+                    goto out2;
+            }
+
+        }
+
+
+
+        point p1(val[0][0],val[0][1],val[0][2]), p2(val[1][0],val[1][1],val[1][2]), p3(val[2][0],val[2][1],val[2][2]);
+        
+
+        point pt1 = transformPoint(P,p1) ;
+        point pt2 = transformPoint(P,p2) ;
+        point pt3 = transformPoint(P,p3) ;
+
+        pt1.homogeneous();
+        pt2.homogeneous();
+        pt3.homogeneous();
+
+        ////////////// print ////////////////////
+
+
+        out3 << pt1.x << "\t" << pt1.y << "\t" << pt1.z << endl;
+        out3 << pt2.x << "\t" << pt2.y << "\t" << pt2.z << endl;
+        out3 << pt3.x << "\t" << pt3.y << "\t" << pt3.z << endl;
+        out3 << endl; 
+
+
+    }
+
+    out2:
+    in3.close();
+    out3.close();
+
 
 
 
