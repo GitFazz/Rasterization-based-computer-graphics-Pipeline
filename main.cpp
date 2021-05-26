@@ -4,6 +4,7 @@
 #include <stack>
 #include <cmath>
 #include <fstream>
+#include <vector>
 
 #define PI (2*acos(0.0))
 #include "bitmap_image.hpp"
@@ -11,6 +12,7 @@
 using namespace std;
 
 ///////// class ///////////
+
 
 class point {
     
@@ -24,6 +26,10 @@ class point {
 
     point(double xx,double yy,double zz) {
         x = xx; y = yy; z = zz; w = 1;
+    }
+
+    void setVal(double xx,double yy,double zz) {
+        x = xx; y = yy; z = zz; 
     }
 
      void normalize()
@@ -104,6 +110,10 @@ class point {
 
 };
 
+struct triangle{
+    point points[3];
+    int color[3];
+};
 
 
 struct matrix {
@@ -543,9 +553,75 @@ int main()
     in3.close();
     out3.close();
 
+    ////////////////////////////////////////////////////////// STAGE 4 //////////////////////////////////////////////////////////////////
+
+    
+    ifstream con;
+    con.open("config.txt");
+
+    ifstream in4;
+    in4.open("stage3.txt");
+
+
+    ofstream out4;
+    out4.open("z_buffer.txt");
+
+    int Screen_Width, Screen_Height, left_X, bottom_Y, lim_Front,lim_Rear;
+    con >> Screen_Width >> Screen_Height >> left_X >> bottom_Y >> lim_Front >> lim_Rear;
+    int right_X = -left_X;
+    int top_Y = -bottom_Y;
+
+    vector<triangle> objects;
+    
+
+    while(true) {
+
+
+        double val[3][3];
+
+        for(int i=0;i<3;i++) {
+            for(int j=0;j<3;j++) {
+                if(in4>>val[i][j]) {
+                    //////
+                }
+                else
+                    goto here;
+            }
+
+        }
+
+        triangle t;
+        for(int i=0;i<3;i++) {
+            t.points[i].setVal(val[i][0],val[i][1],val[i][2]);
+            t.color[i] = 100 + rand()%155;
+        }
+        objects.push_back(t);
+
+
+        
+    }
+    here: {}
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    double dx = (right_X-left_X) / Screen_Width;
+    double dy = (top_Y-bottom_Y) / Screen_Height;
+
+    double Top_Y = top_Y - dy/2;
+    double Left_X = left_X + dx/2;
+
+    double pixel_map[Screen_Height][Screen_Width];
+
+    for(int i=0;i<Screen_Height;i++) {
+        for(int j=0;j<Screen_Width;j++) {
+            pixel_map[i][j] = 
+        }
+    }
 
 
 
+ 
 
 
     return 0;
