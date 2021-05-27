@@ -147,6 +147,14 @@ struct matrix {
 
 //////// func /////////////
 
+double getX(int x,double left_X,double dx) {
+    return left_X + x*dx;
+}
+
+double getY(int y,double Top_Y,double dy) {
+    return Top_Y - y*dy;    
+}
+
 
 void print_matrix(matrix m,string s) {
     cout << " >> "+s << endl;
@@ -566,7 +574,9 @@ int main()
     ofstream out4;
     out4.open("z_buffer.txt");
 
-    int Screen_Width, Screen_Height, left_X, bottom_Y, lim_Front,lim_Rear;
+    int Screen_Width, Screen_Height;
+    double left_X, bottom_Y, lim_Front,lim_Rear;
+
     con >> Screen_Width >> Screen_Height >> left_X >> bottom_Y >> lim_Front >> lim_Rear;
     int right_X = -left_X;
     int top_Y = -bottom_Y;
@@ -608,21 +618,91 @@ int main()
     double dx = (right_X-left_X) / Screen_Width;
     double dy = (top_Y-bottom_Y) / Screen_Height;
 
+
     double Top_Y = top_Y - dy/2;
     double Left_X = left_X + dx/2;
+    
 
-    double pixel_map[Screen_Height][Screen_Width];
 
-    for(int i=0;i<Screen_Height;i++) {
-        for(int j=0;j<Screen_Width;j++) {
-            pixel_map[i][j] = 
+    double** z_buffer = new double*[Screen_Width];
+ 
+    for (int i = 0; i < Screen_Width; i++) {
+        z_buffer[i] = new double[Screen_Height];
+    }
+ 
+    
+    for (int i = 0; i < Screen_Width; i++) {
+        for (int j = 0; j < Screen_Height; j++) {
+            z_buffer[i][j] = lim_Rear;
         }
+    }
+ 
+    bitmap_image* image = new bitmap_image(Screen_Width, Screen_Height);
+
+    // background image color set to black
+
+    for (int i = 0; i < Screen_Width; i++) { 
+        for(int j=0;j<Screen_Height;j++) {
+            image->set_pixel(i,j,0,0,0);
+        }
+    }
+    
+    for (int i=0; i<objects.size(); i++) {
+
+        triangle t = objects[i];
+
+        double t_minY = 9;
+        double t_maxY = -9;
+        for(int ii=0;ii<3;ii++) {
+            t_maxY = max(t_maxY,t.points[ii].y);
+            t_minY = min(t_minY,t.points[ii].y);
+        }
+        
+        double top_scanline = min(t_maxY,Top_Y);
+        double bottom_scanline = max( t_minY,bottom_Y);
+
+        for(double Yp = top_scanline; Yp >= bottom_scanline; Yp -= dy) {
+            
+            double Xa=9, Xb=9; // just a random unusual init
+
+            for(int j=0;j<3;j++) {
+                int ii = j; int jj = (j+1) % 3; // two points to check, ii and jj
+
+                // check
+                // will get into this loop for two times 
+                if ((Yp > t.points[ii].y && Yp < t.points[jj].y) || (Yp > t.points[jj].y && Yp < t.points[ii].y) ) {
+                    
+                    double ans = (t.points[ii].x-t.points[jj].x)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y);
+                    if(Xa == 9) {
+                        Xa = ans;
+                    }
+                    else Xb = ans;
+                }
+            }
+            
+            
+        }
+
     }
 
 
 
- 
 
 
+
+
+
+
+
+
+    image->save_image("output.bmp");
+
+    //Delete the array created
+    for(int i=0;i<Screen_Width;i++)    //To delete the inner arrays
+    delete [] z_buffer[i];   
+    delete [] z_buffer; 
+    delete image;
+
+    cout << "done!" << endl;
     return 0;
 }
