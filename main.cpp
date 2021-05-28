@@ -664,7 +664,7 @@ int main()
         for(double Yp = top_scanline; Yp >= bottom_scanline; Yp -= dy) {
             
             double Xa=9, Xb=9; // just a random unusual init
-
+            double Za,Zb;
             for(int j=0;j<3;j++) {
                 int ii = j; int jj = (j+1) % 3; // two points to check, ii and jj
 
@@ -672,16 +672,31 @@ int main()
                 // will get into this loop for two times 
                 if ((Yp > t.points[ii].y && Yp < t.points[jj].y) || (Yp > t.points[jj].y && Yp < t.points[ii].y) ) {
                     
-                    double ans = (t.points[ii].x-t.points[jj].x)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y);
+                    double ans =  t.points[ii].x - ((t.points[ii].x-t.points[jj].x)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
                     if(Xa == 9) {
                         Xa = ans;
+                        Za = t.points[ii].z - ((t.points[ii].z-t.points[jj].z)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
                     }
-                    else Xb = ans;
+                    else {
+                        Xb = ans;
+                        Zb = t.points[ii].z - ((t.points[ii].z-t.points[jj].z)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
+                    };
                 }
             }
+
+
+             
+            int left_col = round( (min(Xa,Xb) - Left_X) / dx );
+            int right_col = round( (max(Xa,Xb) - Left_X) / dx );
+            
+            int row = (Top_Y-Yp) / dy;
+            
+            int z_inc = modulusx / (right_col-left_col)
             
             
         }
+
+
 
     }
 
