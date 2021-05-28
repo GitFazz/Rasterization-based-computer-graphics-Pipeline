@@ -578,8 +578,8 @@ int main()
     double left_X, bottom_Y, lim_Front,lim_Rear;
 
     con >> Screen_Width >> Screen_Height >> left_X >> bottom_Y >> lim_Front >> lim_Rear;
-    int right_X = -left_X;
-    int top_Y = -bottom_Y;
+    double right_X = -left_X;
+    double top_Y = -bottom_Y;
 
     vector<triangle> objects;
     
@@ -600,10 +600,11 @@ int main()
 
         }
 
+
         triangle t;
         for(int i=0;i<3;i++) {
             t.points[i].setVal(val[i][0],val[i][1],val[i][2]);
-            t.color[i] = 100 + rand()%155;
+            t.color[i] = rand()%255;
         }
         objects.push_back(t);
 
@@ -672,26 +673,50 @@ int main()
                 // will get into this loop for two times 
                 if ((Yp > t.points[ii].y && Yp < t.points[jj].y) || (Yp > t.points[jj].y && Yp < t.points[ii].y) ) {
                     
-                    double ans =  t.points[ii].x - ((t.points[ii].x-t.points[jj].x)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
+                    double xtemp = (Yp - t.points[ii].y)*(t.points[ii].x - t.points[jj].x)/(t.points[ii].y-t.points[jj].y) + t.points[ii].x; 
+                    double ytemp = (Yp - t.points[ii].y)*(t.points[ii].z - t.points[jj].z)/(t.points[ii].y-t.points[jj].y) + t.points[ii].z; 
                     if(Xa == 9) {
-                        Xa = ans;
-                        Za = t.points[ii].z - ((t.points[ii].z-t.points[jj].z)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
+                        Xa = xtemp;
+                        Za = ytemp;
                     }
                     else {
-                        Xb = ans;
-                        Zb = t.points[ii].z - ((t.points[ii].z-t.points[jj].z)*(t.points[ii].y-Yp) / (t.points[ii].y-t.points[jj].y));
+                        Xb = xtemp;
+                        Zb = ytemp;
                     };
+                }
+            }   
+
+
+             
+            int left_col,right_col,Z_init;
+
+            if(Xa>Xb) {
+                left_col = round( (Xb-Left_X)/dx );
+                right_col = round( (Xa-Left_X)/dx );
+                Z_init = Zb;
+            }
+            else {
+                left_col = round( (Xa-Left_X)/dx );;
+                right_col = round( (Xb-Left_X)/dx );;
+                Z_init = Za;
+            }
+            
+            int row = round( (Top_Y-Yp) / dy ); 
+            double z_inc = (Zb-Za)/(Xb-Xa);
+            double Z = Z_init;
+
+            for(int col=left_col; col<=right_col;col++) {
+                Z += z_inc; 
+                if(col>=0 && col<Screen_Width) {
+                    if(z_buffer[col][row]>Z) {
+                        z_buffer[col][row] = Z;
+                        image->set_pixel(col, row, t.color[0],t.color[1],t.color[2]);
+                    }
                 }
             }
 
 
-             
-            int left_col = round( (min(Xa,Xb) - Left_X) / dx );
-            int right_col = round( (max(Xa,Xb) - Left_X) / dx );
             
-            int row = (Top_Y-Yp) / dy;
-            
-            int z_inc = modulusx / (right_col-left_col)
             
             
         }
@@ -699,11 +724,6 @@ int main()
 
 
     }
-
-
-
-
-
 
 
 
@@ -718,6 +738,6 @@ int main()
     delete [] z_buffer; 
     delete image;
 
-    cout << "done!" << endl;
+    cout << "image created!" << endl;
     return 0;
 }
