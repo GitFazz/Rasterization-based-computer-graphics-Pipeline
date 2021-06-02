@@ -284,7 +284,7 @@ int main()
     ofstream out1;
     out1.open("stage1.txt");
 
-    out1 << fixed << setprecision(2);
+    //out1 << fixed << setprecision(2);
 
 
     //////////// load data ////////////
@@ -412,7 +412,7 @@ int main()
     ofstream out2;
     out2.open("stage2.txt");
 
-    out2 << fixed << setprecision(2);
+    //out2 << fixed << setprecision(2);
 
 
 
@@ -503,7 +503,7 @@ int main()
     ofstream out3;
     out3.open("stage3.txt");
 
-    out3 << fixed << setprecision(2);
+    //out3 << fixed << setprecision(2);
 
     double fovX = fovY * aspectRatio;
     double tt = near * tan( (fovY*PI) / (2*180) );
@@ -688,7 +688,8 @@ int main()
 
 
              
-            int left_col,right_col,Z_init;
+            int left_col,right_col;
+            double Z_init;
 
             if(Xa>Xb) {
                 left_col = round( (Xb-Left_X)/dx );
@@ -715,16 +716,20 @@ int main()
                 }
             }
 
-
-            
-            
-            
         }
 
 
 
     }
 
+    for(int i=0;i<Screen_Width;i++) {
+        for(int j=0;j<Screen_Height;i++) {
+            if(z_buffer[i][j]<lim_Rear) {
+                out4 << z_buffer[i][j] << " ";
+            }
+        }
+        out4 << endl;
+    }
 
 
 
