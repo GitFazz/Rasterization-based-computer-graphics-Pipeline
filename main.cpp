@@ -1,4 +1,4 @@
-// Efaz, 1605034
+// Offline-2 final submission by 1605034
 
 #include <iostream>
 #include <stack>
@@ -284,7 +284,7 @@ int main()
     ofstream out1;
     out1.open("stage1.txt");
 
-    //out1 << fixed << setprecision(2);
+    out1 << fixed << setprecision(4);
 
 
     //////////// load data ////////////
@@ -412,7 +412,8 @@ int main()
     ofstream out2;
     out2.open("stage2.txt");
 
-    //out2 << fixed << setprecision(2);
+    
+    out2 << fixed << setprecision(4);
 
 
 
@@ -503,7 +504,7 @@ int main()
     ofstream out3;
     out3.open("stage3.txt");
 
-    //out3 << fixed << setprecision(2);
+    out3 << fixed << setprecision(4);
 
     double fovX = fovY * aspectRatio;
     double tt = near * tan( (fovY*PI) / (2*180) );
@@ -573,6 +574,8 @@ int main()
 
     ofstream out4;
     out4.open("z_buffer.txt");
+
+    out4 << fixed << setprecision(4);
 
     int Screen_Width, Screen_Height;
     double left_X, bottom_Y, lim_Front,lim_Rear;
@@ -722,20 +725,24 @@ int main()
 
     }
 
+    image->save_image("output.bmp");
+
     for(int i=0;i<Screen_Width;i++) {
-        for(int j=0;j<Screen_Height;i++) {
+        for(int j=0;j<Screen_Height;j++) {
             if(z_buffer[i][j]<lim_Rear) {
-                out4 << z_buffer[i][j] << " ";
+                out4 << z_buffer[i][j];
             }
         }
         out4 << endl;
     }
 
+    out4.close();
+    in4.close();
+    con.close();
 
 
 
-
-    image->save_image("output.bmp");
+    
 
     //Delete the array created
     for(int i=0;i<Screen_Width;i++)    //To delete the inner arrays
